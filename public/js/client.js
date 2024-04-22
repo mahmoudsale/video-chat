@@ -1424,7 +1424,7 @@ async function whoAreYou() {
         allowOutsideClick: false,
         allowEscapeKey: false,
         background: swBg,
-        title: 'MiroTalk P2P',
+        title: 'Ulum Al Azhar',
         position: 'center',
         input: 'text',
         inputPlaceholder: 'Enter your name',
@@ -4257,6 +4257,7 @@ function setScreenShareBtn() {
  */
 function setRecordStreamBtn() {
     recordStreamBtn.addEventListener('click', (e) => {
+        
         if (isStreamRecording) {
             stopStreamRecording();
         } else {
@@ -5600,36 +5601,36 @@ async function shareRoomUrl() {
 function shareRoomMeetingURL(checkScreen = false) {
     playSound('newMessage');
     const roomURL = getRoomURL();
-    Swal.fire({
-        background: swBg,
-        position: 'center',
-        title: 'Share the room',
-        html: `
-        <div id="qrRoomContainer">
-            <canvas id="qrRoom"></canvas>
-        </div>
-        <br/>
-        <p style="color:rgb(8, 189, 89);">Join from your mobile device</p>
-        <p style="background:transparent; color:white; font-family: Arial, Helvetica, sans-serif;">No need for apps, simply capture the QR code with your mobile camera Or Invite someone else to join by sending them the following URL</p>
-        <p style="color:rgb(8, 189, 89);">${roomURL}</p>`,
-        showDenyButton: true,
-        showCancelButton: true,
-        cancelButtonColor: 'red',
-        denyButtonColor: 'green',
-        confirmButtonText: `Copy URL`,
-        denyButtonText: `Email invite`,
-        cancelButtonText: `Close`,
-        showClass: { popup: 'animate__animated animate__fadeInDown' },
-        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-    }).then((result) => {
-        if (result.isConfirmed) {
-            copyRoomURL();
-        } else if (result.isDenied) {
-            shareRoomByEmail();
-        }
-        // share screen on join room
-        if (checkScreen) checkShareScreen();
-    });
+    // Swal.fire({
+    //     background: swBg,
+    //     position: 'center',
+    //     title: 'Share the room',
+    //     html: `
+    //     <div id="qrRoomContainer">
+    //         <canvas id="qrRoom"></canvas>
+    //     </div>
+    //     <br/>
+    //     <p style="color:rgb(8, 189, 89);">Join from your mobile device</p>
+    //     <p style="background:transparent; color:white; font-family: Arial, Helvetica, sans-serif;">No need for apps, simply capture the QR code with your mobile camera Or Invite someone else to join by sending them the following URL</p>
+    //     <p style="color:rgb(8, 189, 89);">${roomURL}</p>`,
+    //     showDenyButton: true,
+    //     showCancelButton: true,
+    //     cancelButtonColor: 'red',
+    //     denyButtonColor: 'green',
+    //     confirmButtonText: `Copy URL`,
+    //     denyButtonText: `Email invite`,
+    //     cancelButtonText: `Close`,
+    //     showClass: { popup: 'animate__animated animate__fadeInDown' },
+    //     hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+    // }).then((result) => {
+    //     if (result.isConfirmed) {
+    //         copyRoomURL();
+    //     } else if (result.isDenied) {
+    //         shareRoomByEmail();
+    //     }
+    //     // share screen on join room
+    //     if (checkScreen) checkShareScreen();
+    // });
     makeRoomQR();
 }
 
@@ -6542,6 +6543,7 @@ function handleMediaRecorder(mediaRecorder) {
  * @param {object} event of media recorder
  */
 function handleMediaRecorderStart(event) {
+     
     startRecordingTimer();
     emitPeersAction('recStart');
     emitPeerStatus('rec', true);
@@ -6560,6 +6562,7 @@ function handleMediaRecorderStart(event) {
 function handleMediaRecorderData(event) {
     console.log('MediaRecorder data: ', event);
     if (event.data && event.data.size > 0) recordedBlobs.push(event.data);
+   console.log(event.data);
 }
 
 /**
@@ -6644,6 +6647,8 @@ function resumeRecording() {
 /**
  * Download recorded stream
  */
+let uploadProgress; // Declare the uploadProgress variable to hold the progress bar element
+
 function downloadRecordedStream() {
     try {
         const type = recordedBlobs[0].type.includes('mp4') ? 'mp4' : 'webm';
@@ -6657,12 +6662,22 @@ function downloadRecordedStream() {
         <br/>
             <ul>
                 <li>Time: ${recordingTime.innerText}</li>
-                <li>File: ${recFileName}</li>
-                <li>Codecs: ${recCodecs}</li>
+       
                 <li>Size: ${blobFileSize}</li>
             </ul>
         <br/>
         `;
+        // const recordingInfo = `
+        // <br/>
+        // <br/>
+        //     <ul>
+        //         <li>Time: ${recordingTime.innerText}</li>
+        //         <li>File: ${recFileName}</li>
+        //         <li>Codecs: ${recCodecs}</li>
+        //         <li>Size: ${blobFileSize}</li>
+        //     </ul>
+        // <br/>
+        // `;
         lastRecordingInfo.innerHTML = `<br/>Last recording info: ${recordingInfo}`;
         recordingTime.innerText = '';
 
@@ -6672,10 +6687,106 @@ function downloadRecordedStream() {
                 🔴 &nbsp; Recording Info: <br/>
                 ${recordingInfo}
                 Please wait to be processed, then will be downloaded to your ${currentDevice} device.
-            </div>`,
-        );
+                <br>
+                <br>
 
-        saveBlobToFile(blob, recFileName);
+                <div id="uploadContainer" style="position: relative;">
+                <progress id="uploadProgress" max="100" value="0" style="width: 98%; min-width:98%; height: 20px; margin-bottom: 10px; background-color: #e0e0e0;"></progress> <!-- Progress bar -->
+                
+                <div id="uploadResult" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; margin-top: 10px; display: none;"></div>  
+                </div>
+                <br>
+                <br>
+                <div>
+                  <button id="btnDownloadLocaly" style="background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; margin-right: 10px; float: left;">download localy</button>
+                  <button id="btnClose" style="background-color: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 4px; float: left;">Close</button>
+               </div>  `,
+        ); 
+        uploadProgress = document.getElementById('uploadProgress'); // Assign the progress bar element to uploadProgress
+        
+        uploadFile(blob, recFileName, function(success) {
+            const uploadResult = document.getElementById('uploadResult');
+            const uploadProgress = document.getElementById('uploadProgress');
+ 
+
+            if (success) {
+                uploadResult.innerText = 'Success'; // Set upload result to success
+                uploadResult.classList.add('uploadResult-success'); // Apply success style
+            } else {
+                uploadResult.innerText = 'Failed'; // Set upload result to failure
+                uploadResult.classList.add('uploadResult-fail'); // Apply failure style
+            }
+            
+            // Show the upload result label and position it over the progress bar
+            uploadResult.style.display = 'block';
+            //uploadProgress.style.visibility = 'hidden'; // Hide the progress bar
+
+
+            // if (success) {
+            //     // Swal.fire({
+            //     //     background: swBg,
+            //     //     position: 'center',
+            //     //     icon: 'success',
+            //     //     title: 'Upload Success',
+            //     //     html: `<div style="text-align: left;">
+            //     //               Your upload was successful!
+            //     //            </div>`,
+               
+            //     //     allowOutsideClick: false,
+            //     //     showClass: { popup: 'animate__animated animate__fadeInDown' },
+            //     //     hideClass: { popup: 'animate__animated animate__fadeOutUp' }, 
+            //     //     didClose: () => {
+            //     //         userLog(
+            //     //             'success-html',
+            //     //             `<div style="text-align: left;">
+            //     //                 🔴 &nbsp; Recording Info: <br/>
+            //     //                 ${recordingInfo}
+            //     //                 Please wait to be processed, then will be downloaded to your ${currentDevice} device.
+            //     //                 <br>
+            //     //                 <br>
+            //     //                 <div>
+            //     //                   <button id="btnDownloadLocaly" style="background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; margin-right: 10px; float: left;">download localy</button>
+            //     //                   <button id="btnClose" style="background-color: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 4px; float: left;">Close</button>
+            //     //                </div>
+                                
+            //     //                 </div>`,
+            //     //         ); 
+            //     //     }
+            //     // });
+            // } else {
+            //     Swal.fire({
+            //         background: swBg,
+            //         position: 'center',
+            //         icon: 'error',
+            //         title: 'Upload Failed',
+            //         html: `<div style="text-align: left;">
+            //                   Oops! Something went wrong with your upload and localy copy is saved.
+            //                </div>`,
+               
+            //         allowOutsideClick: false,
+            //         showClass: { popup: 'animate__animated animate__fadeInDown' },
+            //         hideClass: { popup: 'animate__animated animate__fadeOutUp' }, 
+            //         didClose: () => {
+            //             userLog(
+            //                 'success-html',
+            //                 `<div style="text-align: left;">
+            //                     🔴 &nbsp; Recording Info: <br/>
+            //                     ${recordingInfo}
+            //                     Please wait to be processed, then will be downloaded to your ${currentDevice} device.
+            //                     <br>
+            //                     <br>
+            //                     <div>
+            //                       <button id="btnDownloadLocaly" style="background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; margin-right: 10px; float: left;">download localy</button>
+            //                       <button id="btnClose" style="background-color: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 4px; float: left;">Button 2</button>
+            //                    </div>
+                                
+            //                     </div>`,
+            //             ); 
+            //         }
+            //     }); 
+            // }
+        });
+        //saveBlobToFile(blob, recFileName);
     } catch (err) {
         userLog('error', 'Recording save failed: ' + err);
     }
@@ -9513,6 +9624,7 @@ function endDownload() {
  * @param {string} file to save
  */
 function saveBlobToFile(blob, file) {
+     
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     elemDisplay(a, false);
@@ -9525,6 +9637,78 @@ function saveBlobToFile(blob, file) {
         window.URL.revokeObjectURL(url);
     }, 100);
 }
+
+AWS.config.update({
+    accessKeyId: 'AKIA3B6NC4F6KFFEPG7E',
+    secretAccessKey: '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',
+    region: 'eu-west-2' // Update the region
+});
+
+const s3 = new AWS.S3();
+// function uploadFile(blob,recFileName, callback)
+//     {
+//         if (blob instanceof Blob) {
+//             //const fileName = 'recorded-video.mp4';  
+//             const fileName =recFileName;
+//             const fileType = 'video/mp4';  
+
+//             const params = {
+//                 Bucket: 'sessionattachments',
+//                 Key: fileName,
+//                 Body: blob,
+//                 ContentType: fileType
+//             };
+
+//             s3.upload(params, function(err, data) {
+//                 if (err) {
+//                     saveBlobToFile(blob, recFileName);
+//                     callback(false);  
+//                 } else { 
+//                     console.log('File uploaded successfully:', data.Location);
+//                     callback(true);  
+//                 }
+//             });
+//         } else {
+//             console.log('Invalid Blob object');
+//             callback(false);  
+//         }
+//     }
+
+
+function uploadFile(blob, recFileName, callback) {
+    
+    if (blob instanceof Blob) {
+        const fileName = recFileName;
+        const fileType = 'video/mp4';
+
+        const params = {
+            Bucket: 'sessionattachments',
+            Key: fileName,
+            Body: blob,
+            ContentType: fileType
+        };
+
+        s3.upload(params)
+            .on('httpUploadProgress', function(progress) {
+                const percentage = Math.round((progress.loaded / progress.total) * 100);
+                uploadProgress.value = percentage; // Update progress bar value
+            })
+            .send(function(err, data) {
+                if (err) {
+                    saveBlobToFile(blob, recFileName);
+                    callback(false);
+                } else {
+                    console.log('File uploaded successfully:', data.Location);
+                    callback(true);
+                }
+            });
+    } else {
+        console.log('Invalid Blob object');
+        callback(false);
+    }
+}
+
+
 
 /**
  * Opend and send Video URL to all peers in the room
@@ -10000,6 +10184,8 @@ function handleMyVolume(data) {
  * @param {string} message to popup
  * @param {integer} timer toast duration ms
  */
+
+ 
 function userLog(type, message, timer = 3000) {
     switch (type) {
         case 'warning':
@@ -10028,14 +10214,31 @@ function userLog(type, message, timer = 3000) {
             });
             break;
         case 'success-html':
-            Swal.fire({
+                Swal.fire({
                 background: swBg,
                 position: 'center',
-                icon: 'success',
-                title: 'Success',
+                icon: 'info',
+                title: 'Ulum Al Azhar',
                 html: message,
+                showCancelButton: false,
+                showConfirmButton: false,
+                allowOutsideClick: false, // Disable closing by clicking outside
                 showClass: { popup: 'animate__animated animate__fadeInDown' },
                 hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+                didOpen: () => {
+                    // Add event listeners to the buttons after the alert is opened
+                    document.getElementById('btnDownloadLocaly').addEventListener('click', function() { 
+                        const blob = new Blob(recordedBlobs, { type: 'video/' + type });
+                        const recFileName = getDataTimeString() + '-REC.' + type;
+                        saveBlobToFile(blob, recFileName);
+                        // Close the SweetAlert if needed
+                       // Swal.close();
+                    });
+            
+                    document.getElementById('btnClose').addEventListener('click', function() { 
+                        Swal.close();
+                    });
+                }
             });
             break;
         case 'toast':

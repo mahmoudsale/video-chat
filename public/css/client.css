@@ -1787,7 +1787,28 @@ button {
     transform: scale(0.95);
     transition: all 0.3s ease-in-out;
 }
-
+.uploadResult-success
+{
+    color: white;
+    position: absolute;
+  top: 2% !important;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  margin-top: 10px;
+ 
+}
+.uploadResult-fail
+{
+    color: red;
+    position: absolute;
+  top: 2% !important;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  margin-top: 10px;
+  
+}
 /*--------------------------------------------------------------
 # Webkit-Scrollbar Styles
 --------------------------------------------------------------*/
